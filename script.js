@@ -1,7 +1,8 @@
 function generateQR() {
-  let inputValue = document.getElementById("qrText").value.trim();
+  let qrText = document.getElementById("qrText");
   let qrImage = document.getElementById("qrImage");
   let imgBox = document.getElementById("imgBox");
+  let inputValue = qrText.value.trim();
 
   if (inputValue.length > 0) {
     let formattedValue = inputValue; // Default to input value
@@ -43,3 +44,15 @@ function generateQR() {
     alert("Please enter text, a number, a valid URL, or a USSD code.");
   }
 }
+
+// Remove QR Code when input is cleared
+document.getElementById("qrText").addEventListener("input", function () {
+  let imgBox = document.getElementById("imgBox");
+  let qrImage = document.getElementById("qrImage");
+
+  if (this.value.trim().length === 0) {
+    qrImage.src = "";
+    imgBox.classList.add("hidden");
+    imgBox.classList.remove("active");
+  }
+});
