@@ -8,43 +8,62 @@
   </head>
   <body>
     <div class="container">
-      <p>Enter your text or URL</p>
-      <input type="text" placeholder="Text or URL" id="qrText" />
+      <p>Enter text, URL, phone number, or USSD code</p>
+      <input
+        type="text"
+        id="qrText"
+        placeholder="Text, URL, Number, or USSD Code" />
+      <button onclick="generateQR()">Generate QR Code</button>
 
       <div id="imgBox" class="hidden">
         <img src="" alt="QR Code" id="qrImage" />
       </div>
-
-      <button onclick="generateQR()">Generate QR Code</button>
     </div>
 
     <script>
-      let imgBox = document.getElementById("imgBox");
-      let qrImage = document.getElementById("qrImage");
-      let qrText = document.getElementById("qrText");
-
-      qrText.addEventListener("input", function () {
-        if (qrText.value.length === 0) {
-          qrImage.src = "";
-          imgBox.classList.add("hidden");
-          imgBox.classList.remove("active");
-        }
-      });
-
       function generateQR() {
-        let textValue = qrText.value.trim(); // Trim spaces for cleaner input
+        let inputValue = document.getElementById("qrText").value.trim();
+        let qrImage = document.getElementById("qrImage");
+        let imgBox = document.getElementById("imgBox");
 
-        if (textValue.length > 0) {
-          let encodedText = encodeURIComponent(textValue); // Proper encoding for all characters
+        if (inputValue.length > 0) {
+          let formattedValue = inputValue; // Default to input value
 
-          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedText}`;
+          // Detect Input Type
+          if (/^(https?:\/\/|www\.)/.test(inputValue)) {
+            // If it's a URL, ensure it opens correctly
+            formattedValue = inputValue.startsWith("http")
+              ? inputValue
+              : "https://" + inputValue;
+          } else if (/^\+?\d+$/.test(inputValue)) {
+            // If it's a phone number (e.g., +250781578037)
+            formattedValue = "tel:" + inputValue;
+          } else if (/^\*[\d*]+#$/.test(inputValue)) {
+            // If it's a USSD Code (e.g., *182*8*1*0790000000#)
+            formattedValue = "tel:" + inputValue.replace(/#/g, "%23"); // Encode `#` for dialer
+          } else {
+            // If it's plain text, keep it unchanged
+            formattedValue = inputValue;
+          }
+
+          let encodedValue = encodeURIComponent(formattedValue); // Proper encoding
+
+          // Generate QR Code
+          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedValue}`;
           imgBox.classList.remove("hidden");
           imgBox.classList.add("active");
+
+          // Click QR Code to open links, dial numbers, or open USSD
+          qrImage.onclick = function () {
+            if (
+              formattedValue.startsWith("tel:") ||
+              formattedValue.startsWith("http")
+            ) {
+              window.location.href = formattedValue; // Opens numbers, USSD, or links
+            }
+          };
         } else {
-          qrText.classList.add("error");
-          setTimeout(() => {
-            qrText.classList.remove("error");
-          }, 200);
+          alert("Please enter text, a number, a valid URL, or a USSD code.");
         }
       }
     </script>
