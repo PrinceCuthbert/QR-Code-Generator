@@ -32,10 +32,12 @@
       });
 
       function generateQR() {
-        if (qrText.value.length > 0) {
-          qrImage.src =
-            "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" +
-            qrText.value;
+        let textValue = qrText.value.trim(); // Trim spaces for cleaner input
+
+        if (textValue.length > 0) {
+          let encodedText = encodeURIComponent(textValue); // Proper encoding for all characters
+
+          qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodedText}`;
           imgBox.classList.remove("hidden");
           imgBox.classList.add("active");
         } else {
